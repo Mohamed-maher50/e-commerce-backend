@@ -1,20 +1,20 @@
-const mongoose = require('mongoose');
-const autoIncrement = require('mongoose-auto-increment');
+const mongoose = require("mongoose");
+// const autoIncrement = require('mongoose-auto-increment');
 
 // npm install --save --legacy-peer-deps mongoose-auto-increment
 const connection = mongoose.createConnection(process.env.DB_URI);
-autoIncrement.initialize(connection);
+// autoIncrement.initialize(connection);
 
 const orderSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.ObjectId,
-      ref: 'User',
-      required: [true, 'order must belong to user'],
+      ref: "User",
+      required: [true, "order must belong to user"],
     },
     cartItems: [
       {
-        product: { type: mongoose.Schema.ObjectId, ref: 'Product' },
+        product: { type: mongoose.Schema.ObjectId, ref: "Product" },
         count: { type: Number, default: 1 },
         color: String,
         price: Number,
@@ -40,8 +40,8 @@ const orderSchema = new mongoose.Schema(
     },
     paymentMethodType: {
       type: String,
-      enum: ['card', 'cash'],
-      default: 'cash',
+      enum: ["card", "cash"],
+      default: "cash",
     },
     isPaid: {
       type: Boolean,
@@ -59,21 +59,21 @@ const orderSchema = new mongoose.Schema(
 
 orderSchema.pre(/^find/, function (next) {
   this.populate({
-    path: 'user',
-    select: 'name profileImg email phone',
+    path: "user",
+    select: "name profileImg email phone",
   }).populate({
-    path: 'cartItems.product',
-    select: 'title imageCover ratingsAverage ratingsQuantity',
+    path: "cartItems.product",
+    select: "title imageCover ratingsAverage ratingsQuantity",
   });
 
   next();
 });
 
-orderSchema.plugin(autoIncrement.plugin, {
-  model: 'Order',
-  field: 'id',
-  startAt: 1,
-  incrementBy: 1,
-});
+// orderSchema.plugin(autoIncrement.plugin, {
+//   model: "Order",
+//   field: "id",
+//   startAt: 1,
+//   incrementBy: 1,
+// });
 
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = mongoose.model("Order", orderSchema);
