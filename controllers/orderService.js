@@ -1,12 +1,12 @@
-const asyncHandler = require('express-async-handler');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const asyncHandler = require("express-async-handler");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-const ApiError = require('../utils/apiError');
-const factory = require('./handlersFactory');
-const User = require('../models/userModel');
-const Product = require('../models/productModel');
-const Cart = require('../models/cartModel');
-const Order = require('../models/orderModel');
+const ApiError = require("../utils/apiError");
+const factory = require("./handlersFactory");
+const User = require("../models/userModel");
+const Product = require("../models/productModel");
+const Cart = require("../models/cartModel");
+const Order = require("../models/orderModel");
 
 // @desc    Create new order
 // @route   POST /api/orders/cartId
@@ -53,7 +53,7 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
     await Cart.findByIdAndDelete(req.params.cartId);
   }
 
-  res.status(201).json({ status: 'success', data: order });
+  res.status(201).json({ status: "success", data: order });
 });
 
 // @desc    Get Specific order
@@ -62,7 +62,7 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
 exports.getSpecificOrder = factory.getOne(Order);
 
 exports.filterOrdersForLoggedUser = asyncHandler(async (req, res, next) => {
-  if (req.user.role === 'user') req.filterObject = { user: req.user._id };
+  if (req.user.role === "user") req.filterObject = { user: req.user._id };
   next();
 });
 
@@ -88,7 +88,7 @@ exports.updateOrderToPaid = asyncHandler(async (req, res, next) => {
 
   const updatedOrder = await order.save();
   res.status(200).json({
-    status: 'Success',
+    status: "Success",
     data: updatedOrder,
   });
 });
@@ -109,7 +109,7 @@ exports.updateOrderToDelivered = asyncHandler(async (req, res, next) => {
   order.deliveredAt = Date.now();
 
   const updatedOrder = await order.save();
-  res.status(200).json({ status: 'Success', data: updatedOrder });
+  res.status(200).json({ status: "Success", data: updatedOrder });
 });
 
 // @desc    Create order checkout session
@@ -133,13 +133,22 @@ exports.checkoutSession = asyncHandler(async (req, res, next) => {
   const session = await stripe.checkout.sessions.create({
     line_items: [
       {
-        name: req.user.name,
-        amount: cartPrice * 100,
-        currency: 'egp',
+        price_data: {
+          name: req.user.name,
+          currency: "egp",
+          unit_amount: cartPrice,
+          product_data: {
+            name: "T-shirt",
+            description: "Comfortable cotton t-shirt",
+            images: ["https://example.com/t-shirt.png"],
+          },
+        },
         quantity: 1,
       },
     ],
-    mode: 'payment',
+
+    mode: "payment",
+
     // success_url: `${req.protocol}://${req.get('host')}/orders`,
     success_url: `http://localhost:3000/user/allorders`,
     // cancel_url: `${req.protocol}://${req.get('host')}/cart`,
@@ -153,7 +162,7 @@ exports.checkoutSession = asyncHandler(async (req, res, next) => {
 
   // 3) Create session as response
   res.status(200).json({
-    status: 'success',
+    status: "success",
     session,
   });
 });
@@ -174,7 +183,7 @@ const createOrderCheckout = async (session) => {
     cartItems: cart.products,
     shippingAddress,
     totalOrderPrice: checkoutAmount,
-    paymentMethodType: 'card',
+    paymentMethodType: "card",
     isPaid: true,
     paidAt: Date.now(),
   });
@@ -200,7 +209,7 @@ const createOrderCheckout = async (session) => {
 // @route   PUT /webhook-checkout
 // @access  From stripe
 exports.webhookCheckout = (req, res, next) => {
-  const signature = req.headers['stripe-signature'].toString();
+  const signature = req.headers["stripe-signature"].toString();
   let event;
   try {
     event = stripe.webhooks.constructEvent(
@@ -212,7 +221,7 @@ exports.webhookCheckout = (req, res, next) => {
     return res.status(400).send(`Webhook error: ${err.message}`);
   }
 
-  if (event.type === 'checkout.session.completed') {
+  if (event.type === "checkout.session.completed") {
     createOrderCheckout(event.data.object);
   }
 
