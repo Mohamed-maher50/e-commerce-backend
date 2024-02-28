@@ -180,7 +180,11 @@ exports.checkoutSession = asyncHandler(async (req, res, next) => {
 const createOrderCheckout = async (session) => {
   // 1) Get needed data from session
   const cartId = session.client_reference_id;
+  console.log(session);
+  console.log("end session");
+  console.log(session.display_items);
   const checkoutAmount = session.display_items[0].amount / 100;
+
   const shippingAddress = session.metadata;
 
   // 2) Get Cart and User
