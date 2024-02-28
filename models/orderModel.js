@@ -52,7 +52,9 @@ const orderSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    deliveredAt: Date,
+    deliveredAt: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );

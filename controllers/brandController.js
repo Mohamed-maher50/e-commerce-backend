@@ -5,25 +5,33 @@ const asyncHandler = require("express-async-handler");
 const factory = require("./handlersFactory");
 const { uploadSingleImage } = require("../middlewares/imageUpload");
 const Brand = require("../models/brandModel");
+const cloudinary = require("../config/cloudinary");
+const ApiError = require("../utils/apiError");
 
 exports.uploadBrandImage = uploadSingleImage("image");
 
 // Resize image
 exports.resizeImage = asyncHandler(async (req, res, next) => {
   if (!req.file) return next();
-
-  // req.file.filename = `category-${uuidv4()}-${Date.now()}.jpeg`;
-  const ext = req.file.mimetype.split("/")[1];
-  const filename = `brand-${uuidv4()}-${Date.now()}.${ext}`;
-
-  await sharp(req.file.buffer)
+  const file = await sharp(req.file.buffer)
     // .resize(500, 500)
-    // .toFormat('jpeg')
-    // .jpeg({ quality: 90 })
-    .toFile(`uploads/brands/${filename}`); // write into a file on the disk
+    .toFormat("webp")
+    .webp({ quality: 90 })
+    .toBuffer();
 
-  req.body.image = filename;
-  next();
+  cloudinary.uploader
+    .upload_stream(
+      {
+        folder: "brands",
+      },
+      (err, result) => {
+        if (err) return next(new ApiError("can't upload brand image"));
+
+        req.body.image = result.url;
+        next();
+      }
+    )
+    .end(file);
 });
 
 // @desc      Get all brands

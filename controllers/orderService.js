@@ -30,11 +30,23 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
     : cart.totalCartPrice;
 
   // 3) Create order with default cash option
-  const order = await Order.create({
+  console.log({
     user: req.user._id,
     cartItems: cart.products,
     shippingAddress: req.body.shippingAddress,
     totalOrderPrice: taxPrice + shippingPrice + cartPrice,
+  });
+  const order = await Order.create({
+    user: req.user._id,
+    cartItems: cart.products,
+
+    totalOrderPrice: taxPrice + shippingPrice + cartPrice,
+    shippingAddress: {
+      details: "String",
+      phone: "String",
+      city: "String",
+      postalCode: "String",
+    },
   });
 
   // 4) After creating order decrement product quantity, increment sold
@@ -135,11 +147,10 @@ exports.checkoutSession = asyncHandler(async (req, res, next) => {
       {
         price_data: {
           currency: "egp",
-          unit_amount: cartPrice,
+          unit_amount: cartPrice * 100,
           product_data: {
             name: "T-shirt",
             description: "Comfortable cotton t-shirt",
-            images: ["https://example.com/t-shirt.png"],
           },
         },
         quantity: 1,

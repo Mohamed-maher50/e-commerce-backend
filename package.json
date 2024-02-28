@@ -20,8 +20,10 @@
   },
   "homepage": "https://github.com/Boghdady/preparing-nodejs-course#readme",
   "dependencies": {
+    "@img/sharp-win32-x64": "^0.33.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.2",
+    "cloudinary": "^2.0.1",
     "colors": "^1.4.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
@@ -51,8 +53,5 @@
     "eslint-plugin-react": "^7.28.0",
     "nodemon": "^2.0.15",
     "prettier": "^2.5.1"
-  },
-  "engines": {
-    "node": ">=10.0.0"
   }
 }

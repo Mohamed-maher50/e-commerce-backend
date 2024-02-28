@@ -1,13 +1,10 @@
 const sharp = require("sharp");
-const { v4: uuidv4 } = require("uuid");
-const asyncHandler = require("express-async-handler");
-
+const expressAsyncHandler = require("express-async-handler");
 const multer = require("multer");
-
 const ApiError = require("../utils/apiError");
 const Product = require("../models/productModel");
 const factory = require("./handlersFactory");
-
+const { uploadToCloudinary } = require("../utils/UploadToCloudinary");
 // Storage
 const multerStorage = multer.memoryStorage();
 
@@ -26,43 +23,48 @@ exports.uploadProductImages = upload.fields([
   { name: "imageCover", maxCount: 1 },
   { name: "images", maxCount: 5 },
 ]);
-
-exports.resizeProductImages = asyncHandler(async (req, res, next) => {
-  // 1) Image Process for imageCover
-  if (req.files.imageCover) {
-    const ext = req.files.imageCover[0].mimetype.split("/")[1];
-    const imageCoverFilename = `products-${uuidv4()}-${Date.now()}-cover.${ext}`;
-    await sharp(req.files.imageCover[0].buffer)
-      // .resize(2000, 1333)
-      // .toFormat('jpeg')
-      // .jpeg({ quality: 90 })
-      .toFile(`uploads/products/${imageCoverFilename}`); // write into a file on the disk
-
-    // Save imageCover into database
-    req.body.imageCover = imageCoverFilename;
-  }
-  req.body.images = [];
-  // 2- Image processing for images
-  if (req.files.images) {
-    await Promise.all(
-      req.files.images.map(async (img, index) => {
-        const ext = img.mimetype.split("/")[1];
-        const filename = `products-${uuidv4()}-${Date.now()}-${
-          index + 1
-        }.${ext}`;
-        await sharp(img.buffer)
-          // .resize(800, 800)
-          // .toFormat('jpeg')
-          // .jpeg({ quality: 90 })
-          .toFile(`uploads/products/${filename}`);
-
-        // Save images into database
-        req.body.images.push(filename);
+exports.resizeImageCover = expressAsyncHandler(async (req, res, next) => {
+  if (req.files && req.files.imageCover) {
+    const imageCover = await sharp(req.files.imageCover[0].buffer)
+      .toFormat("webp")
+      .webp({
+        quality: 90,
       })
-    );
+      .toBuffer();
+    // note this information before update only buffer is updated
+    req.files.imageCover[0].buffer = imageCover;
   }
-
   next();
+});
+exports.uploadImageCover = expressAsyncHandler(async (req, res, next) => {
+  try {
+    if (req.files && req.files.imageCover && req.files.imageCover.length) {
+      const result = await uploadToCloudinary(req.files.imageCover[0].buffer, {
+        folder: "products",
+      });
+      req.body.imageCover = result.url;
+    }
+    next();
+  } catch (error) {
+    next(new ApiError("can't upload cover image"));
+  }
+});
+exports.uploadImages = expressAsyncHandler(async (req, res, next) => {
+  try {
+    if (req.files && req.files.images && req.files.images.length) {
+      const images = req.files.images.map(async (img) => {
+        const result = await uploadToCloudinary(img.buffer, {
+          folder: "products",
+        });
+        return result.url;
+      });
+      const imgsUrls = await Promise.all(images);
+      req.body.images = imgsUrls;
+    }
+    next();
+  } catch (error) {
+    next(new ApiError("can't upload product images"));
+  }
 });
 
 // @desc      Get all products

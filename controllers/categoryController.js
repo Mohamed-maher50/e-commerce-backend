@@ -1,11 +1,12 @@
-const sharp = require('sharp'); // image processing lib for nodejs
-const { v4: uuidv4 } = require('uuid');
-const asyncHandler = require('express-async-handler');
+const sharp = require("sharp"); // image processing lib for nodejs
+const { v4: uuidv4 } = require("uuid");
+const asyncHandler = require("express-async-handler");
 
-const factory = require('./handlersFactory');
-const { uploadSingleImage } = require('../middlewares/imageUpload');
-const Category = require('../models/categoryModel');
-
+const factory = require("./handlersFactory");
+const { uploadSingleImage } = require("../middlewares/imageUpload");
+const Category = require("../models/categoryModel");
+const cloudinary = require("../config/cloudinary");
+const ApiError = require("../utils/apiError");
 // 1- Use diskStorage Engine (configure destination & image name)
 // const multerStorage = multer.diskStorage({
 //   destination: function (req, file, cb) {
@@ -35,22 +36,26 @@ const Category = require('../models/categoryModel');
 // const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
 
 // exports.uploadCategoryImage = upload.single('image');
-exports.uploadCategoryImage = uploadSingleImage('image');
+exports.uploadCategoryImage = uploadSingleImage("image");
 
 // Resize image
 exports.resizeImage = asyncHandler(async (req, res, next) => {
   if (!req.file) return next();
-
-  // req.file.filename = `category-${uuidv4()}-${Date.now()}.jpeg`;
-  const ext = req.file.mimetype.split('/')[1];
-  const filename = `category-${uuidv4()}-${Date.now()}.${ext}`;
-
-  await sharp(req.file.buffer)
-    // .resize(500, 500)
-    .toFile(`uploads/categories/${filename}`); // write into a file on the disk
-
-  req.body.image = filename;
-  next();
+  const file = await sharp(req.file.buffer).resize(500, 500).toBuffer();
+  cloudinary.uploader
+    .upload_stream(
+      {
+        folder: "categories",
+      },
+      (err, result) => {
+        if (!err) {
+          req.body.image = result.url;
+          return next();
+        }
+        return next(new ApiError("can't not upload image category"));
+      }
+    )
+    .end(file);
 });
 
 // @desc      Get all categories

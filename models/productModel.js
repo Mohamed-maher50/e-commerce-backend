@@ -1,13 +1,13 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
   {
     title: {
       type: String,
       trim: true,
-      required: [true, 'Product title is required'],
-      minlength: [3, 'Too short product title'],
-      maxlength: [100, 'Too long product title'],
+      required: [true, "Product title is required"],
+      minlength: [3, "Too short product title"],
+      maxlength: [100, "Too long product title"],
     },
     slug: {
       type: String,
@@ -16,12 +16,12 @@ const productSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      required: [true, 'Product description is required'],
-      maxlength: [2000, 'Too long description'],
+      required: [true, "Product description is required"],
+      maxlength: [2000, "Too long description"],
     },
     quantity: {
       type: Number,
-      required: [true, 'Product quantity is required'],
+      required: [true, "Product quantity is required"],
     },
     sold: {
       type: Number,
@@ -29,9 +29,9 @@ const productSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      required: [true, 'Product price is required'],
+      required: [true, "Product price is required"],
       trim: true,
-      maxlength: [32, 'To long price'],
+      maxlength: [32, "To long price"],
     },
     priceAfterDiscount: {
       type: Number,
@@ -39,29 +39,29 @@ const productSchema = new mongoose.Schema(
     availableColors: [String],
     imageCover: {
       type: String,
-      required: [true, 'Product Image cover is required'],
+      required: [true, "Product Image cover is required"],
     },
     images: [String],
     category: {
       type: mongoose.Schema.ObjectId,
-      ref: 'Category',
-      required: [true, 'Product must be belong to a category'],
+      ref: "Category",
+      required: [true, "Product must be belong to a category"],
     },
     subcategory: [
       {
         type: mongoose.Schema.ObjectId,
-        ref: 'SubCategory',
+        ref: "SubCategory",
       },
     ],
     brand: {
       type: mongoose.Schema.ObjectId,
-      ref: 'Brand',
+      ref: "Brand",
     },
     ratingsAverage: {
       type: Number,
       // default: 0,
-      min: [1, 'Rating must be above or equal 1.0'],
-      max: [5, 'Rating must be below or equal 5.0'],
+      min: [1, "Rating must be above or equal 1.0"],
+      max: [5, "Rating must be below or equal 5.0"],
       set: (val) => Math.round(val * 10) / 10, // 3.6666 * 10 = 36.666  = 37 = 3.7
     },
     ratingsQuantity: {
@@ -70,7 +70,7 @@ const productSchema = new mongoose.Schema(
     },
   },
   {
-    toJSON: { virtuals: true },
+    // toJSON: { virtuals: true },
     toObject: { virtuals: true },
     timestamps: true,
   }
@@ -84,10 +84,10 @@ const productSchema = new mongoose.Schema(
 // });
 
 // Virtual populate: populate review on the product (review pointing to the product not the product pointing to the review) the parent (product) does not know about the child (review)
-productSchema.virtual('reviews', {
-  ref: 'Review',
-  foreignField: 'product',
-  localField: '_id',
+productSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "product",
+  localField: "_id",
 });
 
 // const setImageUrl = (doc) => {
@@ -109,4 +109,4 @@ productSchema.virtual('reviews', {
 //   setImageUrl(doc);
 // });
 
-module.exports = mongoose.model('Product', productSchema);
+module.exports = mongoose.model("Product", productSchema);

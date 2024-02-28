@@ -44,7 +44,8 @@ app.post(
   bodyParser.raw({ type: "application/json" }),
   webhookCheckout
 );
-
+// morgan("tiny")
+app.use(morgan("dev"));
 // Used to parse JSON bodies
 app.use(express.json());
 // app.use(cors());

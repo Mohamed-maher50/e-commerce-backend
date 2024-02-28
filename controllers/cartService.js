@@ -159,6 +159,7 @@ exports.getLoggedUserCart = asyncHandler(async (req, res, next) => {
 // @access    Private/User
 exports.removeCartProduct = asyncHandler(async (req, res, next) => {
   const { itemId } = req.params;
+
   const cart = await Cart.findOneAndUpdate(
     { cartOwner: req.user._id },
     {
