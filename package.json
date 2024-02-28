@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/Boghdady/preparing-nodejs-course#readme",
   "dependencies": {
-    "@img/sharp-win32-x64": "^0.33.2",
+
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.2",
     "cloudinary": "^2.0.1",
