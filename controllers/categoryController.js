@@ -7,33 +7,6 @@ const { uploadSingleImage } = require("../middlewares/imageUpload");
 const Category = require("../models/categoryModel");
 const cloudinary = require("../config/cloudinary");
 const ApiError = require("../utils/apiError");
-// 1- Use diskStorage Engine (configure destination & image name)
-// const multerStorage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     cb(null, 'uploads/categories');
-//   },
-//   filename: function (req, file, cb) {
-//     const ext = file.mimetype.split('/')[1];
-//     const filename = `category-${uuidv4()}-${Date.now()}.${ext}`;
-//     cb(null, `${filename}`);
-//   },
-// });
-
-// 2- Use a memory storage to store files on a memory as a buffer to make image processing
-// const multerStorage = multer.memoryStorage();
-
-// Accept only images
-// const multerFilter = (req, file, cb) => {
-//   if (!req.body.name) {
-//     cb(new ApiError('Category name required', 400), false);
-//   } else if (file.mimetype.startsWith('image')) {
-//     cb(null, true);
-//   } else {
-//     cb(new ApiError('only images allowed', 400), false);
-//   }
-// };
-
-// const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
 
 // exports.uploadCategoryImage = upload.single('image');
 exports.uploadCategoryImage = uploadSingleImage("image");
@@ -46,6 +19,18 @@ exports.resizeImage = asyncHandler(async (req, res, next) => {
     .upload_stream(
       {
         folder: "categories",
+        format: "webp",
+        transformation: [
+          {
+            aspect_ratio: "1.0",
+            gravity: "face",
+            height: 200,
+            crop: "thumb",
+          },
+          {
+            radius: "max",
+          },
+        ],
       },
       (err, result) => {
         if (!err) {

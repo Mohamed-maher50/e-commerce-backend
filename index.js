@@ -16,31 +16,25 @@ const { webhookCheckout } = require("./controllers/orderService");
 
 const dbConnection = require("./config/database");
 
-// const categoryRouter = require("./routes/categoryRoute");
-// const subCategoryRouter = require("./routes/subCategoryRoute");
-// const brandRouter = require("./routes/brandRoute");
-// const productRouter = require("./routes/productRoute");
-// const userRouter = require("./routes/userRoute");
-// const authRouter = require("./routes/authRoute");
-// const reviewRouter = require("./routes/reviewRoute");
-// const wishlistRouter = require("./routes/wishlistRoute");
-// const addressRouter = require("./routes/addressRoute");
-// const couponRouter = require("./routes/couponRoute");
-
 // DB Connection
 dbConnection();
-
 // Builtin Middleware
 const app = express();
 
-app.use(cors());
-app.options("*", cors());
+// app.use(cors("*"));
+app.options(
+  "*",
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true, // Allow cookies and authentication headers
+  })
+);
 app.enable("trust proxy");
 
 // Add hook here before we call body parser, because stripe will send data in the body in form raw
 app.post(
   "/webhook-checkout",
-  // express.raw({ type: 'application/json' }),
+
   bodyParser.raw({ type: "application/json" }),
   webhookCheckout
 );
@@ -48,8 +42,6 @@ app.post(
 app.use(morgan("dev"));
 // Used to parse JSON bodies
 app.use(express.json());
-// app.use(cors());
-// app.options('*', cors());
 
 // Parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));

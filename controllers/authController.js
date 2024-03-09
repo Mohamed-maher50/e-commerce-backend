@@ -3,10 +3,94 @@ const crypto = require("crypto");
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-
+const { ExtractJwt, Strategy: JwtStrategy } = require("passport-jwt");
+const { Strategy: GoogleStrategy } = require("passport-google-oauth20");
+const passport = require("passport");
+const admin = require("firebase-admin");
 const ApiError = require("../utils/apiError");
 const sendEmail = require("../utils/sendEmail");
 const User = require("../models/userModel");
+// eslint-disable-next-line node/no-unpublished-require
+const serviceAccount = require("../firebase-credentials.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+exports.JwtStrategyMiddleware = new JwtStrategy(
+  {
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKey: process.env.JWT_SECRET,
+  },
+  (payload, done) => {
+    console.log("here payload");
+    console.log(payload);
+
+    done(null, payload);
+  }
+);
+
+exports.googleAuth = asyncHandler(async (req, res, next) => {
+  // get id token from client
+  const { token } = req.body;
+  // verify token
+  const decodedToken = await admin.auth().verifyIdToken(token);
+
+  if (!decodedToken.email)
+    return next(new ApiError("token not valid or not have payload", 401));
+
+  const { email, picture, name } = decodedToken;
+
+  let isUserExist = await User.findOne({ email });
+
+  if (!isUserExist) {
+    // genrate new user and model will hash password check use model
+    const randomstring = Math.random().toString(36).slice(-13);
+
+    // if no user then create new user
+    isUserExist = await User({
+      email,
+      profileImg: picture,
+      name,
+      password: randomstring,
+    }).save();
+  }
+  // to ensure isUserExist created
+  if (!isUserExist)
+    return next(new ApiError("can not create user or server error"));
+
+  // create jwt for this user
+  const jwtToken = jwt.sign({ id: isUserExist._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+
+  delete isUserExist.password;
+
+  return res.status(200).json({ data: isUserExist, token: jwtToken });
+});
+
+// @ desc google auth
+// @ route GET /api/v1/auth/google
+// @ access public
+exports.googleScreen = passport.authenticate("google", {
+  scope: ["email", "profile"],
+  session: false,
+  accessType: "offline",
+});
+
+// @ desc google callback if login succeeded
+// @ route GET api/v1/auth/google/callback
+// @ access protected by Google
+exports.googleCallBack = [
+  passport.authenticate("google", {
+    session: false,
+  }),
+  (req, res) => {
+    // console.log("callback");
+    // const token = generateToken(req.user);
+    // console.log(token);
+    // res.redirect(`localhost:5173/?token=${token}`);
+  },
+];
 
 // @desc      Signup
 // @route     POST /api/v1/auth/signup

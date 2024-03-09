@@ -1,4 +1,4 @@
-const AppError = require('../utils/apiError');
+const AppError = require("../utils/apiError");
 // 1) With out development mode
 // const customError = (err, req, res, next) => {
 //   // console.log(err.stack);
@@ -34,23 +34,23 @@ const handleDuplicateFieldsDB = (err) => {
 };
 
 const handleJWTError = () =>
-  new AppError('Invalid Token. please login again', 401);
+  new AppError("Invalid Token. please login again", 401);
 
 const handleExpiredJWT = () =>
-  new AppError('Expired Token. please login again', 401);
+  new AppError("Expired Token. please login again", 401);
 
 /* Define a global error handling middleware by specifying 4 parameters express know automatically that
     this is error handling middleware   */
 const globalError = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
-  err.status = err.status || 'error';
+  err.status = err.status || "error";
 
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     sendErrorForDev(err, req, res);
   } else {
     if (err.code === 11000) err = handleDuplicateFieldsDB(err);
-    if (err.name === 'JsonWebTokenError') err = handleJWTError();
-    if (err.name === 'TokenExpiredError') err = handleExpiredJWT();
+    if (err.name === "JsonWebTokenError") err = handleJWTError();
+    if (err.name === "TokenExpiredError") err = handleExpiredJWT();
     sendErrorForProduction(err, req, res);
   }
 };

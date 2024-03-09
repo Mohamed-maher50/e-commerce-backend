@@ -183,7 +183,7 @@ const createOrderCheckout = async (session) => {
   console.log(session);
   console.log("end session");
   console.log(session.display_items);
-  const checkoutAmount = session.display_items[0].amount / 100;
+  const checkoutAmount = session.amount_total / 100;
 
   const shippingAddress = session.metadata;
 

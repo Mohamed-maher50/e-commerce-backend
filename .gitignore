@@ -4,3 +4,4 @@ config.env
 .env
 # Environment variables
 
+firebase-credentials.json
