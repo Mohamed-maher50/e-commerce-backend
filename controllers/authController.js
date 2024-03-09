@@ -7,14 +7,28 @@ const { ExtractJwt, Strategy: JwtStrategy } = require("passport-jwt");
 const { Strategy: GoogleStrategy } = require("passport-google-oauth20");
 const passport = require("passport");
 const admin = require("firebase-admin");
+const { cert } = require("firebase-admin/app");
 const ApiError = require("../utils/apiError");
 const sendEmail = require("../utils/sendEmail");
 const User = require("../models/userModel");
-// eslint-disable-next-line node/no-unpublished-require
-const serviceAccount = require("../firebase-credentials.json");
+
+const service = {
+  type: process.env.firebaseGoogleType,
+  project_id: process.env.firebaseGoogleProject_id,
+  private_key_id: process.env.firebaseGooglePrivate_key_id,
+  private_key: process.env.firebaseGooglePrivate_key.replace(/\\n/g, "\n"),
+  client_email: process.env.firebaseGoogleClient_email,
+  client_id: process.env.firebaseGoogleClient_id,
+  auth_uri: process.env.firebaseGoogleAuth_uri,
+  token_uri: process.env.firebaseGoogleToken_uri,
+  auth_provider_x509_cert_url:
+    process.env.firebaseGoogleAuth_provider_x509_cert_url,
+  client_x509_cert_url: process.env.firebaseGoogleClient_x509_cert_url,
+  universe_domain: process.env.firebaseGoogleUniverse_domain,
+};
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: cert(service),
 });
 exports.JwtStrategyMiddleware = new JwtStrategy(
   {
