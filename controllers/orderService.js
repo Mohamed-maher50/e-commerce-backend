@@ -176,7 +176,7 @@ const createOrderCheckout = async (session) => {
   const cartId = session.client_reference_id;
   console.log(session);
   console.log("end session");
-  console.log(session.display_items);
+
   const checkoutAmount = session.amount_total / 100;
 
   const shippingAddress = session.metadata;
@@ -184,7 +184,15 @@ const createOrderCheckout = async (session) => {
   // 2) Get Cart and User
   const cart = await Cart.findById(cartId);
   const user = await User.findOne({ email: session.customer_email });
-
+  console.log({
+    user: user._id,
+    cartItems: cart.products,
+    shippingAddress,
+    totalOrderPrice: checkoutAmount,
+    paymentMethodType: "card",
+    isPaid: true,
+    paidAt: Date.now(),
+  });
   //3) Create order
   const order = await Order.create({
     user: user._id,
@@ -195,7 +203,8 @@ const createOrderCheckout = async (session) => {
     isPaid: true,
     paidAt: Date.now(),
   });
-
+  console.log("order");
+  console.log(order);
   // 4) After creating order decrement product quantity, increment sold
   // Performs multiple write operations with controls for order of execution.
   if (order) {
