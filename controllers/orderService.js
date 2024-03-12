@@ -183,7 +183,9 @@ const createOrderCheckout = async (session) => {
 
   // 2) Get Cart and User
   const cart = await Cart.findById(cartId);
+  console.log(cart);
   const user = await User.findOne({ email: session.customer_email });
+  console.log(user);
   console.log({
     user: user._id,
     cartItems: cart.products,
