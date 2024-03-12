@@ -1,11 +1,12 @@
+/* eslint-disable node/no-missing-require */
 const crypto = require("crypto");
 
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
-const passport = require("passport");
 const admin = require("firebase-admin");
+// eslint-disable-next-line import/no-unresolved
 const { cert } = require("firebase-admin/app");
 const ApiError = require("../utils/apiError");
 const sendEmail = require("../utils/sendEmail");
@@ -68,30 +69,6 @@ exports.googleAuth = asyncHandler(async (req, res, next) => {
 
   return res.status(200).json({ data: isUserExist, token: jwtToken });
 });
-
-// @ desc google auth
-// @ route GET /api/v1/auth/google
-// @ access public
-exports.googleScreen = passport.authenticate("google", {
-  scope: ["email", "profile"],
-  session: false,
-  accessType: "offline",
-});
-
-// @ desc google callback if login succeeded
-// @ route GET api/v1/auth/google/callback
-// @ access protected by Google
-exports.googleCallBack = [
-  passport.authenticate("google", {
-    session: false,
-  }),
-  (req, res) => {
-    // console.log("callback");
-    // const token = generateToken(req.user);
-    // console.log(token);
-    // res.redirect(`localhost:5173/?token=${token}`);
-  },
-];
 
 // @desc      Signup
 // @route     POST /api/v1/auth/signup
