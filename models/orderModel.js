@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 // const autoIncrement = require('mongoose-auto-increment');
 
-// npm install --save --legacy-peer-deps mongoose-auto-increment
-const connection = mongoose.createConnection(process.env.DB_URI);
+// // npm install --save --legacy-peer-deps mongoose-auto-increment
+// const connection = mongoose.createConnection(process.env.DB_URI);
 // autoIncrement.initialize(connection);
 
 const orderSchema = new mongoose.Schema(

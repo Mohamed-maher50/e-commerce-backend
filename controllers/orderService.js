@@ -39,14 +39,8 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
   const order = await Order.create({
     user: req.user._id,
     cartItems: cart.products,
-
     totalOrderPrice: taxPrice + shippingPrice + cartPrice,
-    shippingAddress: {
-      details: "String",
-      phone: "String",
-      city: "String",
-      postalCode: "String",
-    },
+    shippingAddress: req.body.shippingAddress,
   });
 
   // 4) After creating order decrement product quantity, increment sold
@@ -160,9 +154,9 @@ exports.checkoutSession = asyncHandler(async (req, res, next) => {
     mode: "payment",
 
     // success_url: `${req.protocol}://${req.get('host')}/orders`,
-    success_url: `http://localhost:3000/user/allorders`,
+    success_url: process.env.STRIPE_success_url,
     // cancel_url: `${req.protocol}://${req.get('host')}/cart`,
-    cancel_url: `http://localhost:3000/cart`,
+    cancel_url: process.env.STRIPE_success_url,
     customer_email: req.user.email,
     client_reference_id: req.params.cartId,
     metadata: req.body.shippingAddress,
@@ -237,7 +231,7 @@ exports.webhookCheckout = (req, res, next) => {
 
   if (event.type === "checkout.session.completed") {
     console.log("success listen");
-    // createOrderCheckout(event.data.object);
+    createOrderCheckout(event.data.object);
   }
 
   res.status(200).json({ received: true });

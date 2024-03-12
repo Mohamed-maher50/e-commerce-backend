@@ -22,13 +22,7 @@ dbConnection();
 const app = express();
 
 // app.use(cors("*"));
-app.options(
-  "*",
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true, // Allow cookies and authentication headers
-  })
-);
+app.options("*", cors());
 app.enable("trust proxy");
 
 // Add hook here before we call body parser, because stripe will send data in the body in form raw

@@ -3,8 +3,7 @@ const crypto = require("crypto");
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const { ExtractJwt, Strategy: JwtStrategy } = require("passport-jwt");
-const { Strategy: GoogleStrategy } = require("passport-google-oauth20");
+
 const passport = require("passport");
 const admin = require("firebase-admin");
 const { cert } = require("firebase-admin/app");
@@ -30,18 +29,6 @@ const service = {
 admin.initializeApp({
   credential: cert(service),
 });
-exports.JwtStrategyMiddleware = new JwtStrategy(
-  {
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: process.env.JWT_SECRET,
-  },
-  (payload, done) => {
-    console.log("here payload");
-    console.log(payload);
-
-    done(null, payload);
-  }
-);
 
 exports.googleAuth = asyncHandler(async (req, res, next) => {
   // get id token from client
