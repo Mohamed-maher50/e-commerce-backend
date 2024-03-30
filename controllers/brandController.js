@@ -23,6 +23,11 @@ exports.resizeImage = asyncHandler(async (req, res, next) => {
     .upload_stream(
       {
         folder: "brands",
+        format: "webp",
+        transformation: [
+          { aspect_ratio: "1:1", gravity: "auto", width: 250, crop: "auto" },
+          { radius: 35 },
+        ],
       },
       (err, result) => {
         if (err) return next(new ApiError("can't upload brand image"));

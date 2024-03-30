@@ -9,11 +9,11 @@ const compression = require("compression");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const ApiError = require("./utils/apiError");
 const globalError = require("./middlewares/errorMiddleware");
 const mountRoutes = require("./routes");
 const { webhookCheckout } = require("./controllers/orderService");
-
 const dbConnection = require("./config/database");
 
 // DB Connection
@@ -32,8 +32,7 @@ app.post(
   bodyParser.raw({ type: "application/json" }),
   webhookCheckout
 );
-// morgan("tiny")
-app.use(morgan("dev"));
+
 // Used to parse JSON bodies
 app.use(express.json());
 

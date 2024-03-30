@@ -14,22 +14,15 @@ exports.uploadCategoryImage = uploadSingleImage("image");
 // Resize image
 exports.resizeImage = asyncHandler(async (req, res, next) => {
   if (!req.file) return next();
-  const file = await sharp(req.file.buffer).resize(500, 500).toBuffer();
+  const file = await sharp(req.file.buffer).resize(250, 250).toBuffer();
   cloudinary.uploader
     .upload_stream(
       {
         folder: "categories",
-        format: "webp",
+        format: "png",
         transformation: [
-          {
-            aspect_ratio: "1.0",
-            gravity: "face",
-            height: 200,
-            crop: "thumb",
-          },
-          {
-            radius: "max",
-          },
+          { aspect_ratio: "1:1", gravity: "auto", width: 250, crop: "auto" },
+          { radius: 35 },
         ],
       },
       (err, result) => {

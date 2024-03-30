@@ -100,7 +100,7 @@ exports.getAll = (Model, modelName = "") =>
       .search(modelName)
       .limitFields()
       .sort();
-    // .paginate();
+    // .paginate(documentsCounts);
 
     // Apply pagination after filer and search
     const docsCount = await Model.countDocuments(apiFeatures.mongooseQuery);
