@@ -1,4 +1,3 @@
-const sharp = require("sharp");
 const expressAsyncHandler = require("express-async-handler");
 const multer = require("multer");
 const ApiError = require("../utils/apiError");
@@ -23,19 +22,7 @@ exports.uploadProductImages = upload.fields([
   { name: "imageCover", maxCount: 1 },
   { name: "images", maxCount: 5 },
 ]);
-exports.resizeImageCover = expressAsyncHandler(async (req, res, next) => {
-  if (req.files && req.files.imageCover) {
-    const imageCover = await sharp(req.files.imageCover[0].buffer)
-      .toFormat("webp")
-      .webp({
-        quality: 90,
-      })
-      .toBuffer();
-    // note this information before update only buffer is updated
-    req.files.imageCover[0].buffer = imageCover;
-  }
-  next();
-});
+
 exports.uploadImageCover = expressAsyncHandler(async (req, res, next) => {
   try {
     if (req.files && req.files.imageCover && req.files.imageCover.length) {

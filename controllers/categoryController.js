@@ -1,39 +1,29 @@
-const sharp = require("sharp"); // image processing lib for nodejs
-const { v4: uuidv4 } = require("uuid");
 const asyncHandler = require("express-async-handler");
 
 const factory = require("./handlersFactory");
 const { uploadSingleImage } = require("../middlewares/imageUpload");
 const Category = require("../models/categoryModel");
-const cloudinary = require("../config/cloudinary");
 const ApiError = require("../utils/apiError");
+const { uploadToCloudinary } = require("../utils/UploadToCloudinary");
 
-// exports.uploadCategoryImage = upload.single('image');
 exports.uploadCategoryImage = uploadSingleImage("image");
 
 // Resize image
 exports.resizeImage = asyncHandler(async (req, res, next) => {
-  if (!req.file) return next();
-  const file = await sharp(req.file.buffer).resize(250, 250).toBuffer();
-  cloudinary.uploader
-    .upload_stream(
-      {
-        folder: "categories",
-        format: "png",
-        transformation: [
-          { aspect_ratio: "1:1", gravity: "auto", width: 250, crop: "auto" },
-          { radius: 35 },
-        ],
-      },
-      (err, result) => {
-        if (!err) {
-          req.body.image = result.url;
-          return next();
-        }
-        return next(new ApiError("can't not upload image category"));
-      }
-    )
-    .end(file);
+  if (!req.file) return next(new ApiError(`can't found category image`));
+  try {
+    const result = await uploadToCloudinary(req.file.buffer, {
+      folder: "categories",
+      transformation: [
+        { aspect_ratio: "1:1", gravity: "auto", width: 250, crop: "auto" },
+        { radius: 35 },
+      ],
+    });
+    req.body.image = result.url;
+    return next();
+  } catch (error) {
+    return next(new ApiError("can't not upload image category"));
+  }
 });
 
 // @desc      Get all categories

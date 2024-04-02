@@ -7,7 +7,6 @@ const {
   deleteProduct,
   uploadProductImages,
 
-  resizeImageCover,
   uploadImageCover,
   uploadImages,
 } = require("../controllers/productController");
@@ -35,9 +34,9 @@ router
     authController.auth,
     authController.allowedTo("admin", "manager"),
     uploadProductImages,
+    createProductValidator,
     uploadImageCover,
     uploadImages,
-    createProductValidator,
     createProduct
   );
 
@@ -49,10 +48,9 @@ router
     authController.auth,
     authController.allowedTo("admin", "manager"),
     uploadProductImages,
-
+    updateProductValidator,
     uploadImageCover,
     uploadImages,
-    updateProductValidator,
     updateProduct
   )
   .delete(

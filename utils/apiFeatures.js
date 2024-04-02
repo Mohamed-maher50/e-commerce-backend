@@ -23,7 +23,7 @@ class ApiFeatures {
       const sortBy = this.queryString.sort.split(",").join(" ");
       this.mongooseQuery = this.mongooseQuery.sort(sortBy);
     } else {
-      this.mongooseQuery = this.mongooseQuery.sort("-createdAt");
+      // this.mongooseQuery = this.mongooseQuery.sort("-createdAt");
     }
     return this;
   }
@@ -56,8 +56,8 @@ class ApiFeatures {
   }
 
   paginate(countDocuments) {
-    const page = this.queryString.page * 1 || 1;
-    const limit = this.queryString.limit * 1 || 50;
+    const page = parseInt(this.queryString.page, 10) || 1;
+    const limit = parseInt(this.queryString.limit, 10) || 50;
     const skip = (page - 1) * limit;
     const endIndex = page * limit;
 

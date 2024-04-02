@@ -94,17 +94,18 @@ exports.getAll = (Model, modelName = "") =>
     }
 
     // Build query
-    // const documentsCounts = await Model.countDocuments();
+    const documentsCounts = await Model.countDocuments();
     const apiFeatures = new ApiFeatures(Model.find(filter), req.query)
       .filter()
-      .search(modelName)
+      .paginate(documentsCounts)
       .limitFields()
+      .search(modelName)
       .sort();
-    // .paginate(documentsCounts);
 
-    // Apply pagination after filer and search
-    const docsCount = await Model.countDocuments(apiFeatures.mongooseQuery);
-    apiFeatures.paginate(docsCount);
+    // // Apply pagination after filer and search
+    // const docsCount = await Model.countDocuments(apiFeatures.mongooseQuery);
+
+    // apiFeatures.paginate(docsCount);
 
     // Execute query
     const { mongooseQuery, paginationResult } = apiFeatures;
@@ -116,7 +117,7 @@ exports.getAll = (Model, modelName = "") =>
     }
     res
       .status(200)
-      .json({ results: docsCount, paginationResult, data: documents });
+      .json({ results: documentsCounts, paginationResult, data: documents });
   });
 
 exports.deleteAll = (Model) =>
